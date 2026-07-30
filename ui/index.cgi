@@ -281,11 +281,39 @@ if [ "$ACTION" = "save" ]; then
     config_dir=$(dirname -- "$CONFIG_FILE")
     config_name=$(basename -- "$CONFIG_FILE")
     # mkdir is atomic and acts as a portable BusyBox-compatible save lock.
+    # The PID marker lets a later request recover a lock left behind if DSM
+    # terminates this CGI before its EXIT trap has a chance to run.
     lock_dir="${config_dir}/.${config_name}.editor.lock"
-    mkdir -- "$lock_dir" 2>/dev/null ||
-        json_error '409 Conflict' '另一个保存操作正在进行，请稍后重试'
+    lock_pid_file="${lock_dir}/pid"
+    if ! mkdir -- "$lock_dir" 2>/dev/null; then
+        lock_pid=$(sed -n '1p' "$lock_pid_file" 2>/dev/null)
+        # The lock owner may still be between mkdir and writing its PID.
+        case "$lock_pid" in
+            ''|*[!0-9]*)
+                sleep 1
+                lock_pid=$(sed -n '1p' "$lock_pid_file" 2>/dev/null)
+                ;;
+        esac
+        case "$lock_pid" in
+            ''|*[!0-9]*) lock_alive=false ;;
+            *) kill -0 "$lock_pid" 2>/dev/null && lock_alive=true || lock_alive=false ;;
+        esac
+        [ "$lock_alive" != true ] ||
+            json_error '409 Conflict' '另一个保存操作正在进行，请稍后重试'
+        # rmdir proves the lock contains nothing unexpected before reacquiring.
+        rm -f -- "$lock_pid_file"
+        rmdir -- "$lock_dir" 2>/dev/null ||
+            json_error '409 Conflict' '另一个保存操作正在进行，请稍后重试'
+        mkdir -- "$lock_dir" 2>/dev/null ||
+            json_error '409 Conflict' '另一个保存操作正在进行，请稍后重试'
+    fi
+    printf '%s\n' "$$" > "$lock_pid_file" || {
+        rm -f -- "$lock_pid_file"
+        rmdir -- "$lock_dir" 2>/dev/null
+        json_error '500 Internal Server Error' '无法创建保存锁'
+    }
     tmp_file=''
-    trap 'rm -f -- "$tmp_file"; rmdir -- "$lock_dir" 2>/dev/null' EXIT HUP INT TERM
+    trap 'rm -f -- "$tmp_file" "$lock_pid_file"; rmdir -- "$lock_dir" 2>/dev/null' EXIT HUP INT TERM
     tmp_file=$(mktemp "${config_dir}/.${config_name}.tmp.XXXXXX") ||
         json_error '500 Internal Server Error' '无法在配置目录创建临时文件'
 
@@ -379,6 +407,7 @@ if [ "$ACTION" = "save" ]; then
             restart_ok=false
         fi
     fi
+    rm -f -- "$lock_pid_file"
     rmdir -- "$lock_dir" 2>/dev/null
     trap - EXIT HUP INT TERM
     printf 'Content-Type: application/json; charset=utf-8\r\nCache-Control: no-store\r\n\r\n'

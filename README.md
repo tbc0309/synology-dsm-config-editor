@@ -208,6 +208,6 @@ The included DSM codes are `chs`, `cht`, `csy`, `dan`, `enu`, `fre`, `ger`, `hun
 - Keep `ACCESS_MODE=admin` unless ordinary signed-in users must edit the configuration.
 - Saving does not validate TOML, YAML, or other configuration syntax.
 - A failed restart does not roll back a successful save.
-- If DSM forcibly terminates the CGI during saving, remove the hidden `.editor.lock` directory beside the configuration file before retrying.
+- A save lock left behind after DSM forcibly terminates the CGI is detected and removed automatically on the next save.
 
 See [SECURITY.md](SECURITY.md) for the security boundary.
