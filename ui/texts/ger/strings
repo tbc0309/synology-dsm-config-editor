@@ -1,0 +1,6 @@
+[app]
+displayname="Konfigurationseditor"
+description="Bearbeiten und speichern Sie die Paketkonfiguration"
+
+[locale]
+code="ger"

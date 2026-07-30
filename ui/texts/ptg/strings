@@ -1,0 +1,6 @@
+[app]
+displayname="Editor de configuração"
+description="Edite e guarde a configuração do pacote"
+
+[locale]
+code="ptg"

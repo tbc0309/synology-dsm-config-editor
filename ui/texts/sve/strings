@@ -1,0 +1,6 @@
+[app]
+displayname="Konfigurationsredigerare"
+description="Redigera och spara paketkonfigurationen"
+
+[locale]
+code="sve"

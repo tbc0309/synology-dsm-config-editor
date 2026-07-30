@@ -1,0 +1,6 @@
+[app]
+displayname="Éditeur de configuration"
+description="Modifier et enregistrer la configuration du package"
+
+[locale]
+code="fre"

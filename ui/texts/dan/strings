@@ -1,0 +1,6 @@
+[app]
+displayname="Konfigurationseditor"
+description="Rediger og gem pakkekonfigurationen"
+
+[locale]
+code="dan"

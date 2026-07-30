@@ -1,0 +1,6 @@
+[app]
+displayname="Editor konfigurace"
+description="Upravte a uložte konfiguraci balíčku"
+
+[locale]
+code="csy"

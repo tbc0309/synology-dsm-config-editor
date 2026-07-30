@@ -1,0 +1,24 @@
+{
+    "Main.js": {
+        "SYNO.SDS.EasyTier.Instance": {
+            "type":"app",
+            "version": "1.3.0",
+            "desc": "EasyTier",
+            "icon": "images/icon_{0}.png",
+            "title": "EasyTier",
+            "texts": "texts",
+            "allowMultiInstance": false,
+            "waterfallLoadTexts": true,
+            "appWindow": "SYNO.SDS.EasyTier.Main",
+            "depend": []
+        },
+        "SYNO.SDS.EasyTier.Main": {
+		"type": "lib",
+		"title": "EasyTier",
+		"icon": "images/icon_{0}.png",
+		"texts": "texts",
+		"depend": [
+		]
+	}
+    }
+}

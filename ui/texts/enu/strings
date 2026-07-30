@@ -1,0 +1,6 @@
+[app]
+displayname="Configuration Editor"
+description="Edit and save the package configuration"
+
+[locale]
+code="enu"

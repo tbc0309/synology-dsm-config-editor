@@ -1,0 +1,6 @@
+[app]
+displayname="Editor de configuración"
+description="Editar y guardar la configuración del paquete."
+
+[locale]
+code="spn"

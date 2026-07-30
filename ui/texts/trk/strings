@@ -1,0 +1,6 @@
+[app]
+displayname="Yapılandırma Düzenleyici"
+description="Paket yapılandırmasını düzenleyin ve kaydedin"
+
+[locale]
+code="trk"

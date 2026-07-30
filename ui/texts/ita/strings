@@ -1,0 +1,6 @@
+[app]
+displayname="Editore di configurazione"
+description="Modifica e salva la configurazione del pacchetto"
+
+[locale]
+code="ita"

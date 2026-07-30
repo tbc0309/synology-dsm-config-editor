@@ -1,0 +1,6 @@
+[app]
+displayname="구성 편집기"
+description="패키지 구성 편집 및 저장"
+
+[locale]
+code="krn"

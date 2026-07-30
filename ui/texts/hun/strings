@@ -1,0 +1,6 @@
+[app]
+displayname="Konfigurációszerkesztő"
+description="Szerkessze és mentse a csomagkonfigurációt"
+
+[locale]
+code="hun"

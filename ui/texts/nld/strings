@@ -1,0 +1,6 @@
+[app]
+displayname="Configuratie-editor"
+description="Bewerk de pakketconfiguratie en sla deze op"
+
+[locale]
+code="nld"

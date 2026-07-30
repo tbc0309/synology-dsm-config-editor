@@ -1,0 +1,6 @@
+[app]
+displayname="配置編輯器"
+description="編輯並儲存包配置"
+
+[locale]
+code="cht"

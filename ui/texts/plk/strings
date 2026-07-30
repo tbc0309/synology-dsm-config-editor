@@ -1,0 +1,6 @@
+[app]
+displayname="Edytor konfiguracji"
+description="Edytuj i zapisz konfigurację pakietu"
+
+[locale]
+code="plk"

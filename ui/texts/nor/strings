@@ -1,0 +1,6 @@
+[app]
+displayname="Konfigurasjonsredigering"
+description="Rediger og lagre pakkekonfigurasjonen"
+
+[locale]
+code="nor"

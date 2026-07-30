@@ -1,0 +1,6 @@
+[app]
+displayname="ตัวแก้ไขการกำหนดค่า"
+description="แก้ไขและบันทึกการกำหนดค่าแพ็คเกจ"
+
+[locale]
+code="tha"

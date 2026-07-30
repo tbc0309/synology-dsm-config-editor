@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <meta name="referrer" content="no-referrer">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; connect-src 'self'; base-uri 'none'; form-action 'none'">
+  <title>Opening application</title>
+  <style>
+    *{box-sizing:border-box}html,body{height:100%;margin:0}body{display:grid;place-items:center;background:#f4f7fb;color:#53657b;font:14px system-ui,-apple-system,"Segoe UI","PingFang SC",sans-serif}
+    .loading{text-align:center}.spinner{width:28px;height:28px;margin:0 auto 12px;border:3px solid #dce6f1;border-top-color:#168c6a;border-radius:50%;animation:spin .75s linear infinite}
+    #retry{display:none;margin:14px auto 0;padding:7px 15px;border:1px solid #ccd8e6;border-radius:7px;background:#fff;color:#243247;cursor:pointer}
+    @keyframes spin{to{transform:rotate(360deg)}}
+  </style>
+</head>
+<body>
+  <main class="loading">
+    <div class="spinner" id="spinner"></div>
+    <div id="message">Verifying DSM login…</div>
+    <button id="retry" type="button">Try again</button>
+  </main>
+  <script>
+    (function () {
+      'use strict';
+      var message=document.getElementById('message');
+      var retry=document.getElementById('retry');
+      var spinner=document.getElementById('spinner');
+      var strings={authLoading:'Verifying DSM login…',retry:'Try again',authHttpError:'Unable to retrieve DSM login information ({status})',authNoToken:'DSM did not return a valid SynoToken',authInvalid:'Invalid DSM login response',authNetwork:'Unable to connect to the DSM login service',authTimeout:'DSM login request timed out'};
+      function tr(key,vars){
+        var value=strings[key]||key;
+        Object.keys(vars||{}).forEach(function(name){value=value.split('{'+name+'}').join(String(vars[name]))});
+        return value;
+      }
+      function requestedLanguage(){
+        var requested=new URLSearchParams(location.search).get('lang')||'';
+        if(/^[a-z]{3}$/i.test(requested))return requested.toLowerCase();
+        return 'enu';
+      }
+      function loadLanguage(){
+        function load(code){return fetch('i18n/'+code+'.json',{cache:'no-store'}).then(function(r){if(!r.ok)throw Error();return r.json()})}
+        return load(requestedLanguage()).catch(function(){return load('enu')}).then(function(data){strings=data;retry.textContent=tr('retry');document.title=tr('opening')}).catch(function(){});
+      }
+      function fail(text) {
+        message.textContent=text;
+        spinner.style.display='none';
+        retry.style.display='block';
+      }
+      function getToken() {
+        spinner.style.display='block';
+        retry.style.display='none';
+        message.textContent=tr('authLoading');
+        var xhr=new XMLHttpRequest();
+        xhr.open('GET','/webman/login.cgi',true);
+        xhr.timeout=10000;
+        xhr.onload=function () {
+          if(xhr.status!==200){fail(tr('authHttpError',{status:xhr.status}));return}
+          try {
+            var data=JSON.parse(xhr.responseText);
+            if(!data.SynoToken){fail(tr('authNoToken'));return}
+            // Main.js supplies DSM's official three-letter locale from _TT.
+            // Standalone access has no DSM locale context, so English is used.
+            var language=requestedLanguage();
+            location.replace('index.cgi?SynoToken='+encodeURIComponent(data.SynoToken)+'&lang='+language);
+          } catch (_) {
+            fail(tr('authInvalid'));
+          }
+        };
+        xhr.onerror=function(){fail(tr('authNetwork'))};
+        xhr.ontimeout=function(){fail(tr('authTimeout'))};
+        xhr.send();
+      }
+      retry.onclick=getToken;
+      loadLanguage().finally(getToken);
+    })();
+  </script>
+</body>
+</html>

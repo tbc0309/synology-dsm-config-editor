@@ -1,0 +1,6 @@
+[app]
+displayname="構成エディター"
+description="パッケージ構成を編集して保存する"
+
+[locale]
+code="jpn"

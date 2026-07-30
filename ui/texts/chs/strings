@@ -1,0 +1,6 @@
+[app]
+displayname="配置文件编辑器"
+description="编辑并保存套件配置文件"
+
+[locale]
+code="chs"
