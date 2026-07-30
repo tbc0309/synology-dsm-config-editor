@@ -201,6 +201,6 @@ chmod 755 /var/packages/YourPackage/target/ui/index.cgi
 - 除非普通登录用户确实需要编辑配置，否则保持 `ACCESS_MODE=admin`。
 - 保存前不会校验 TOML、YAML 等配置语法。
 - 重启失败不会撤销已经成功保存的内容。
-- 如果 DSM 在保存过程中强制终止 CGI，需要手工删除配置文件旁隐藏的 `.editor.lock` 目录。
+- 如果 DSM 在保存过程中强制终止 CGI，下次保存时会自动识别并清理遗留的保存锁，无需用户手工处理。
 
 安全边界见 [SECURITY_zh-CN.md](SECURITY_zh-CN.md)。
