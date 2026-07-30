@@ -57,15 +57,65 @@ RESTART_SCRIPT=
 RESTART_ARGS=
 ```
 
-- `PACKAGE_NAME`: exact package name from SPK `INFO`.
-- `CONFIG_FILE`: absolute path to a regular configuration file. Symbolic links are not supported.
-- `DEFAULT_PORT`: optional fixed numeric port. Leave empty to hide the Open Service button unless `PORT_CONFIG_KEY` succeeds.
-- `PORT_CONFIG_KEY`: optional configuration key such as `webServer.port`. Supports common `key = 7500`, `key = "7500"`, `key: 7500`, and quoted forms.
-- `OPEN_PATH`: path appended after the port, for example `/` or `/xxx.html`; it must start with `/`.
-- `ACCESS_MODE`: `admin` or `authenticated`.
-- `RESTART_MODE`: `lifecycle`, `script`, or `none`.
-- `lifecycle`: runs `/var/packages/<PACKAGE_NAME>/scripts/start-stop-status stop`, then `start`.
-- `script`: runs the server-side `RESTART_SCRIPT` with `RESTART_ARGS`.
+- `PACKAGE_NAME`
+  - Exact package identity from SPK `INFO`, including letter case.
+  - Lifecycle mode uses it to locate `/var/packages/<PACKAGE_NAME>/scripts/start-stop-status`.
+  - Allowed characters are letters, numbers, `.`, `_`, and `-`.
+- `CONFIG_FILE`
+  - Absolute path to the file displayed and saved by the editor.
+  - It must already exist and be a regular file; symbolic links are not supported.
+  - The CGI account needs file read/write permission and directory permission to create temporary and backup files.
+  - The maximum readable or writable size is 2 MiB.
+- `DEFAULT_PORT`
+  - Optional fixed service port from `1` to `65535`.
+  - The field is read-only in the UI.
+  - A valid value takes precedence over `PORT_CONFIG_KEY`.
+  - Leave it empty when the package has no web page or the port should come from the configuration file.
+- `PORT_CONFIG_KEY`
+  - Optional exact key used only when `DEFAULT_PORT` is empty.
+  - Examples: `webServer.port`, `port`, or `http-port`.
+  - Supported lines include `key = 7500`, `key = "7500"`, `key: 7500`, and `key: "7500"`, with surrounding spaces, CRLF, common end-of-line comments, and a JSON trailing comma.
+  - The first matching key is used. Nested TOML/YAML/JSON structures are not interpreted, so use a unique key.
+  - Only a numeric value from `1` to `65535` is accepted.
+- `OPEN_PATH`
+  - Optional path appended after the host and port.
+  - It must start with `/`; examples: `/`, `/xxx.html`, `/dashboard/`, or `/ui?mode=admin`.
+  - It does not change the service port or configuration file.
+- `ACCESS_MODE`
+  - `admin` is the recommended default and requires DSM `administrators` membership.
+  - `authenticated` allows any signed-in DSM user to read, save, and trigger the configured post-save action.
+  - An empty value defaults to `admin`; any other value is rejected.
+- `RESTART_MODE`
+  - `lifecycle`: after a successful save, runs `start-stop-status stop`, then `start`; it also enables the service-status badge.
+  - `script`: after a successful save, runs `RESTART_SCRIPT` with `RESTART_ARGS`; the status badge is hidden.
+  - `none` or empty: saves only and does not execute a post-save command.
+- `RESTART_SCRIPT`
+  - Used only by `RESTART_MODE=script`.
+  - Must be an existing executable absolute path controlled by the package maintainer.
+- `RESTART_ARGS`
+  - Optional whitespace-separated arguments for `RESTART_SCRIPT`, for example `restart`.
+  - Shell glob expansion is disabled, and the value is never evaluated with `eval` or `sh -c`.
+
+Examples:
+
+```ini
+# Fixed web port
+DEFAULT_PORT=8080
+PORT_CONFIG_KEY=
+OPEN_PATH=/admin/
+
+# Read webServer.port from frps.toml
+DEFAULT_PORT=
+PORT_CONFIG_KEY=webServer.port
+OPEN_PATH=/
+
+# Save without restarting
+RESTART_MODE=none
+RESTART_SCRIPT=
+RESTART_ARGS=
+```
+
+The Open Service controls are hidden if neither port setting produces a valid port.
 
 ## 2. Edit `ui/config`
 

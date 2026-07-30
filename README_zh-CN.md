@@ -57,15 +57,65 @@ RESTART_SCRIPT=
 RESTART_ARGS=
 ```
 
-- `PACKAGE_NAME`：必须与 SPK `INFO` 中的套件名完全一致。
-- `CONFIG_FILE`：普通配置文件的绝对路径，不支持符号链接。
-- `DEFAULT_PORT`：可选固定数字端口。留空时，除非 `PORT_CONFIG_KEY` 成功读取端口，否则隐藏“打开服务”。
-- `PORT_CONFIG_KEY`：可选，例如 `webServer.port`。支持常见的 `key = 7500`、`key = "7500"`、`key: 7500` 和引号形式。
-- `OPEN_PATH`：端口后的路径，例如 `/` 或 `/xxx.html`，必须以 `/` 开头。
-- `ACCESS_MODE`：可选 `admin` 或 `authenticated`。
-- `RESTART_MODE`：可选 `lifecycle`、`script`、`none`。
-- `lifecycle`：执行 `/var/packages/<PACKAGE_NAME>/scripts/start-stop-status stop`，然后执行 `start`。
-- `script`：执行服务器端指定的 `RESTART_SCRIPT` 和 `RESTART_ARGS`。
+- `PACKAGE_NAME`
+  - 必须与 SPK `INFO` 中的套件标识完全一致，包括大小写。
+  - lifecycle 模式通过它定位 `/var/packages/<PACKAGE_NAME>/scripts/start-stop-status`。
+  - 只允许字母、数字、点、下划线和连字符。
+- `CONFIG_FILE`
+  - 编辑器读取和保存的配置文件绝对路径。
+  - 文件必须已经存在并且是普通文件，不支持符号链接。
+  - CGI 账户需要文件读写权限，配置目录还要允许创建临时文件和备份。
+  - 可读取和保存的最大文件大小为 2 MiB。
+- `DEFAULT_PORT`
+  - 可选固定服务端口，范围为 `1`–`65535`。
+  - 前端只读，不允许用户修改。
+  - 有效值优先于 `PORT_CONFIG_KEY`。
+  - 套件没有网页，或端口需要从配置文件读取时留空。
+- `PORT_CONFIG_KEY`
+  - 只在 `DEFAULT_PORT` 为空时使用，填写需要查找的完整键名。
+  - 例如 `webServer.port`、`port`、`http-port`。
+  - 支持 `key = 7500`、`key = "7500"`、`key: 7500`、`key: "7500"`，并容忍键值两侧空格、CRLF、常见行尾注释和 JSON 末尾逗号。
+  - 读取第一个匹配项，不解析 TOML/YAML/JSON 的嵌套层级，因此应使用唯一键。
+  - 最终结果必须是 `1`–`65535` 的纯数字端口。
+- `OPEN_PATH`
+  - 可选，追加在主机和端口后。
+  - 必须以 `/` 开头，例如 `/`、`/xxx.html`、`/dashboard/`、`/ui?mode=admin`。
+  - 它不会修改服务端口或配置文件。
+- `ACCESS_MODE`
+  - `admin` 是推荐默认值，只允许 DSM `administrators` 组。
+  - `authenticated` 允许任何已登录 DSM 用户读取、保存并触发保存后操作。
+  - 留空按 `admin` 处理，其他值会报错。
+- `RESTART_MODE`
+  - `lifecycle`：保存成功后依次执行 `start-stop-status stop`、`start`，并显示服务状态徽标。
+  - `script`：保存成功后执行 `RESTART_SCRIPT` 和 `RESTART_ARGS`，不显示服务状态徽标。
+  - `none` 或留空：只保存，不执行保存后命令。
+- `RESTART_SCRIPT`
+  - 只在 `RESTART_MODE=script` 时使用。
+  - 必须是由套件维护者控制、已经存在并且可执行的绝对路径。
+- `RESTART_ARGS`
+  - 传给 `RESTART_SCRIPT` 的可选空格分隔参数，例如 `restart`。
+  - CGI 已禁用文件名通配符展开，也不会使用 `eval` 或 `sh -c`。
+
+示例：
+
+```ini
+# 固定网页端口
+DEFAULT_PORT=8080
+PORT_CONFIG_KEY=
+OPEN_PATH=/admin/
+
+# 从 frps.toml 读取 webServer.port
+DEFAULT_PORT=
+PORT_CONFIG_KEY=webServer.port
+OPEN_PATH=/
+
+# 只保存，不重启
+RESTART_MODE=none
+RESTART_SCRIPT=
+RESTART_ARGS=
+```
+
+如果两个端口设置都没有得到有效端口，界面会隐藏“打开服务”区域。
 
 ## 2. 修改 `ui/config`
 
