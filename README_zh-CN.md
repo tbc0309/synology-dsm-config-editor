@@ -6,6 +6,10 @@
 
 ![界面预览](docs/images/configuration-editor-preview.png)
 
+frps 示例：从 `frps.toml` 读取 `webServer.port`：
+
+![frps 配置编辑器界面](docs/images/frps-config-editor-preview.png)
+
 ## 两种版本
 
 仓库提供两个版本，编辑、保存、安全校验、三份备份、端口读取和重启功能完全一致：

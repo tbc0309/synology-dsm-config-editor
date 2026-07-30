@@ -6,6 +6,10 @@ A dependency-free Shell CGI configuration editor for Synology DSM 7 packages. Th
 
 ![Preview](docs/images/configuration-editor-preview.png)
 
+frps example with `webServer.port` read from `frps.toml`:
+
+![frps configuration editor preview](docs/images/frps-config-editor-preview.png)
+
 ## Editions
 
 The repository provides two editions with the same editor, security, backup, port, and restart features:
